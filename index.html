@@ -1,0 +1,1562 @@
+<!DOCTYPE html><html lang="en" class="transition-colors duration-200"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlashOTP — Verification &amp; Deposit Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'upi': '#5F259F',
+        'success': '#059669',
+        'warning': '#D97706',
+        'error': '#DC2626',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-primary-container': '#F1F5F9',
+        'light-on-primary-container': '#0F172A',
+        'light-accent': '#0D9488',
+        'light-on-accent': '#1D1D1D',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#0F172A',
+        'light-surface-container-low': '#F8FAFC',
+        'light-surface-container': '#F1F5F9',
+        'light-surface-container-high': '#E2E8F0',
+        'light-outline': '#CBD5E1',
+        'light-outline-variant': '#E2E8F0',
+        'dark-primary': '#38BDF8',
+        'dark-on-primary': '#082F49',
+        'dark-primary-container': '#1E293B',
+        'dark-on-primary-container': '#E2E8F0',
+        'dark-accent': '#14B8A6',
+        'dark-on-accent': '#042F2E',
+        'dark-surface': '#0B0F19',
+        'dark-on-surface': '#F8FAFC',
+        'dark-surface-container-low': '#111827',
+        'dark-surface-container': '#1F2937',
+        'dark-surface-container-high': '#374151',
+        'dark-outline': '#4B5563',
+        'dark-outline-variant': '#374151',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      fontFamily: {
+        'display': ['"Mulish"', 'sans-serif'],
+        'headline': ['"Mulish"', 'sans-serif'],
+        'title': ['"Mulish"', 'sans-serif'],
+        'body': ['"Instrument Sans"', 'sans-serif'],
+        'label': ['"Instrument Sans"', 'sans-serif'],
+        'code': ['"Spline Sans Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['40px', { lineHeight: '48px', letterSpacing: '-0.8px', fontWeight: '800' }],
+        'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['22px', { lineHeight: '28px', fontWeight: '600' }],
+        'title-lg': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0.1px', fontWeight: '600' }],
+        'label-sm': ['11px', { lineHeight: '16px', letterSpacing: '0.4px', fontWeight: '600' }],
+        'code-md': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+      }
+    },
+  },
+};
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@600;700;800&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Spline+Sans+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined { display: inline-block; width: 1em; height: 1em; line-height: 1 !important; box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="bg-light-surface-container-low dark:bg-dark-surface text-light-on-surface dark:text-dark-on-surface font-body min-h-[1024px] flex flex-col antialiased transition-colors duration-200" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+  <!-- Top Global Navigation Bar -->
+  <header class="bg-light-surface dark:bg-dark-surface-container border-b border-light-outline-variant dark:border-dark-outline-variant sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between transition-colors duration-200 shadow-sm">
+    <div class="flex items-center gap-6 sm:gap-8">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab(&#39;dashboard&#39;)">
+        <div class="w-9 h-9 rounded-lg bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white dark:text-dark-on-primary shadow-sm">
+          <span class="material-symbols-outlined text-xl">bolt</span>
+        </div>
+        <div>
+          <span class="font-headline font-extrabold text-title-lg tracking-tight text-light-primary dark:text-white">Flash<span class="text-light-accent dark:text-dark-accent">OTP</span></span>
+          <span class="block text-[10px] font-semibold text-slate-400 dark:text-slate-400 tracking-wider uppercase">SMS &amp; Virtual Numbers</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 font-label text-label-lg">
+        <button onclick="switchTab(&#39;dashboard&#39;)" id="nav-dashboard" class="nav-btn px-3 py-1.5 rounded-lg text-light-accent dark:text-dark-accent bg-teal-50 dark:bg-teal-950/60 font-semibold flex items-center gap-2 transition-all">
+          <span class="material-symbols-outlined text-lg">dashboard</span>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab(&#39;services&#39;)" id="nav-services" class="nav-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-light-surface-container dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">sms</span>
+          <span>OTP Services</span>
+        </button>
+        <button onclick="switchTab(&#39;deposit&#39;)" id="nav-deposit" class="nav-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-light-surface-container dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+          <span>Deposit (UPI)</span>
+        </button>
+        <button onclick="switchTab(&#39;history&#39;)" id="nav-history" class="nav-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-light-surface-container dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">receipt_long</span>
+          <span>History &amp; Orders</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Header Actions: Balance, Deposit CTA & Dark Mode Toggle -->
+    <div class="flex items-center gap-3">
+      <!-- Live Wallet Balance Widget -->
+      <div onclick="switchTab(&#39;deposit&#39;)" class="cursor-pointer bg-light-surface-container dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline rounded-xl px-3.5 py-1.5 flex items-center gap-2.5 shadow-sm hover:border-light-accent transition-all" title="Click to Deposit Funds">
+        <div id="balanceDotIndicator" class="w-2.5 h-2.5 rounded-full bg-slate-400"></div>
+        <div>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block leading-none">Wallet</span>
+          <div class="font-headline text-base font-bold text-light-primary dark:text-white tabular-nums" id="userLiveBalance">₹0.00</div>
+        </div>
+        <span class="bg-light-accent text-white rounded p-0.5 flex items-center justify-center text-xs">
+          <span class="material-symbols-outlined text-xs">add</span>
+        </span>
+      </div>
+
+      <!-- Dark / Light Mode Toggle Button -->
+      <button onclick="toggleThemeMode()" id="themeToggleBtn" aria-label="Toggle Theme Mode" class="p-2 rounded-xl border border-light-outline-variant dark:border-dark-outline bg-light-surface dark:bg-dark-surface-container text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <span class="material-symbols-outlined text-xl" id="themeIcon">dark_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Sub-Nav -->
+  <div class="md:hidden bg-light-surface dark:bg-dark-surface-container border-b border-light-outline-variant dark:border-dark-outline flex items-center justify-around py-2 px-2 text-xs font-label">
+    <button onclick="switchTab(&#39;dashboard&#39;)" class="flex flex-col items-center gap-0.5 text-light-accent dark:text-dark-accent mobile-nav-btn" id="m-nav-dashboard">
+      <span class="material-symbols-outlined text-lg">dashboard</span>
+      <span>Home</span>
+    </button>
+    <button onclick="switchTab(&#39;services&#39;)" class="flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400 mobile-nav-btn" id="m-nav-services">
+      <span class="material-symbols-outlined text-lg">sms</span>
+      <span>Services</span>
+    </button>
+    <button onclick="switchTab(&#39;deposit&#39;)" class="flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400 mobile-nav-btn" id="m-nav-deposit">
+      <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+      <span>Deposit</span>
+    </button>
+    <button onclick="switchTab(&#39;history&#39;)" class="flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400 mobile-nav-btn" id="m-nav-history">
+      <span class="material-symbols-outlined text-lg">receipt_long</span>
+      <span>History</span>
+    </button>
+  </div>
+
+  <!-- Main Views Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Low / Zero Balance Global Banner (shown when balance is 0) -->
+    <div id="zeroBalanceAlertBanner" class="mb-6 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-200">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-amber-600 text-xl shrink-0">account_balance_wallet</span>
+        <div>
+          <span class="font-bold block text-sm">Wallet Balance is Empty (₹0.00)</span>
+          <span class="text-slate-600 dark:text-slate-300">You must deposit funds to rent numbers and receive OTP codes.</span>
+        </div>
+      </div>
+      <button onclick="switchTab(&#39;deposit&#39;)" class="bg-amber-600 hover:bg-amber-700 text-white font-label font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-transform active:scale-95 shadow-sm">
+        <span class="material-symbols-outlined text-sm">add_card</span> Deposit via UPI
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: DASHBOARD / OVERVIEW                -->
+    <!-- ========================================== -->
+    <div id="tab-dashboard" class="tab-content active space-y-8">
+      
+      <!-- Balance & Quick Action Hero Card -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Live Wallet Balance & Stats -->
+        <div class="lg:col-span-8 bg-gradient-to-br from-slate-900 via-slate-800 to-teal-950 text-white rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-lg border border-slate-700/50">
+          <div class="relative z-10 flex flex-col justify-between h-full space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span class="text-xs uppercase tracking-wider font-semibold text-teal-400 bg-teal-950/80 border border-teal-500/30 px-3 py-1 rounded-full">
+                  Real-Time SMS Verification
+                </span>
+                <h1 class="font-headline text-headline-lg font-extrabold mt-3 tracking-tight">
+                  Verification &amp; OTP Portal
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-md">
+                  Rent temporary virtual numbers for OTP verification. Recharge your wallet via UPI to start.
+                </p>
+              </div>
+
+              <!-- Wallet Balance Big Display -->
+              <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 text-right min-w-[200px]">
+                <span class="text-xs uppercase font-label text-slate-300 block">Available Balance</span>
+                <div class="font-headline text-3xl sm:text-4xl font-black text-emerald-400 tabular-nums" id="heroWalletDisplay">₹0.00</div>
+                <span class="text-[11px] text-slate-300 block mt-0.5" id="heroCreditsEstimate">0 OTP credits</span>
+              </div>
+            </div>
+
+            <!-- Quick Metrics Grid -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-slate-700/60">
+              <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                <span class="text-[11px] text-slate-400 block font-label">Total OTPs Received</span>
+                <span class="font-headline font-bold text-xl sm:text-2xl text-white tabular-nums" id="statOtpsReceived">0</span>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                <span class="text-[11px] text-slate-400 block font-label">Active Numbers</span>
+                <span class="font-headline font-bold text-xl sm:text-2xl text-teal-300 tabular-nums" id="statActiveNumbers">0 Live</span>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                <span class="text-[11px] text-slate-400 block font-label">Success Rate</span>
+                <span class="font-headline font-bold text-xl sm:text-2xl text-emerald-400 tabular-nums">99.4%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access Shortcuts -->
+        <div class="lg:col-span-4 bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white mb-1">Quick Actions</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Manage wallet and virtual numbers</p>
+          </div>
+
+          <div class="space-y-3">
+            <button onclick="switchTab(&#39;deposit&#39;)" class="w-full bg-light-primary dark:bg-dark-primary hover:bg-slate-800 dark:hover:bg-sky-400 text-white dark:text-dark-on-primary py-3 px-4 rounded-xl font-label font-bold text-sm flex items-center justify-between shadow-sm transition-transform active:scale-98">
+              <span class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-xl">add_card</span>
+                <span>Deposit Funds (UPI)</span>
+              </span>
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+
+            <button onclick="switchTab(&#39;services&#39;)" class="w-full bg-light-surface-container dark:bg-dark-surface-container-high hover:bg-teal-50 dark:hover:bg-slate-700 text-light-primary dark:text-white border border-light-outline dark:border-dark-outline py-3 px-4 rounded-xl font-label font-bold text-sm flex items-center justify-between transition-colors">
+              <span class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-xl text-teal-600">sms</span>
+                <span>Get New OTP Number</span>
+              </span>
+              <span class="text-xs text-teal-600 dark:text-teal-400 font-semibold">From ₹1.20</span>
+            </button>
+
+            <button onclick="switchTab(&#39;history&#39;)" class="w-full bg-light-surface-container dark:bg-dark-surface-container-high hover:bg-slate-100 dark:hover:bg-slate-700 text-light-primary dark:text-white border border-light-outline dark:border-dark-outline py-3 px-4 rounded-xl font-label font-bold text-sm flex items-center justify-between transition-colors">
+              <span class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-xl text-purple-600">history</span>
+                <span>View Order History</span>
+              </span>
+              <span class="material-symbols-outlined text-base">chevron_right</span>
+            </button>
+          </div>
+
+          <!-- Gateway Guarantee Badge -->
+          <div class="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded-xl p-3 flex items-center gap-2.5 text-xs text-purple-900 dark:text-purple-300">
+            <span class="material-symbols-outlined text-lg text-upi">verified_user</span>
+            <div>
+              <span class="font-bold block">Dynamic Locked UPI</span>
+              <span class="text-[11px] text-purple-700 dark:text-purple-400">Strict exact amount auto-credit system</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Active Virtual Numbers Widget (Dynamic Container) -->
+      <section class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-400" id="activeListeningDot"></span>
+            <h2 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Active Numbers Listening for OTP</h2>
+          </div>
+          <button onclick="switchTab(&#39;services&#39;)" class="text-xs font-label font-bold text-light-accent dark:text-dark-accent hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">add</span> Rent Number
+          </button>
+        </div>
+
+        <!-- Dynamic Numbers Container: Empty state by default -->
+        <div id="activeNumbersContainer" class="space-y-4">
+          
+          <!-- Empty State (Shown initially when 0 active numbers) -->
+          <div id="emptyNumbersState" class="border-2 border-dashed border-light-outline dark:border-dark-outline rounded-2xl p-8 text-center flex flex-col items-center justify-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl">sms</span>
+            </div>
+            <div>
+              <h4 class="font-headline font-bold text-base text-light-primary dark:text-white">No Active Virtual Numbers</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1">
+                You haven&#39;t requested any numbers yet. Deposit funds to your wallet and rent an OTP number from the services catalog.
+              </p>
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+              <button onclick="switchTab(&#39;deposit&#39;)" class="bg-light-primary dark:bg-dark-primary hover:bg-slate-800 text-white dark:text-dark-on-primary px-4 py-2 rounded-xl text-xs font-label font-bold flex items-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-sm">account_balance_wallet</span> Deposit Funds
+              </button>
+              <button onclick="switchTab(&#39;services&#39;)" class="bg-light-surface-container dark:bg-dark-surface-container-high border border-light-outline dark:border-dark-outline hover:bg-slate-100 dark:hover:bg-slate-700 px-4 py-2 rounded-xl text-xs font-label font-bold text-light-primary dark:text-white flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">apps</span> View Services
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Cards Grid (Populated dynamically when purchased) -->
+          <div id="activeCardsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: OTP SERVICE SECTION (CATALOG)       -->
+    <!-- ========================================== -->
+    <div id="tab-services" class="tab-content space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="font-headline text-headline-md font-bold text-light-primary dark:text-white">Browse Available OTP Services</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Select platforms. Price is deducted from your wallet balance upon ordering.</p>
+        </div>
+
+        <!-- Country / Region Filter & Search -->
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+            <input type="text" placeholder="Search service (e.g. WhatsApp, Google)" class="pl-9 pr-3 py-1.5 text-xs bg-light-surface dark:bg-dark-surface-container border border-light-outline dark:border-dark-outline rounded-lg text-light-primary dark:text-white outline-none w-56 sm:w-64">
+          </div>
+          <select id="serviceCountrySelect" class="text-xs py-1.5 px-3 bg-light-surface dark:bg-dark-surface-container border border-light-outline dark:border-dark-outline rounded-lg text-light-primary dark:text-white outline-none">
+            <option value="+91">🇮🇳 India (+91)</option>
+            <option value="+1">🇺🇸 United States (+1)</option>
+            <option value="+44">🇬🇧 United Kingdom (+44)</option>
+            <option value="+1">🇨🇦 Canada (+1)</option>
+            <option value="+880">🇧🇩 Bangladesh (+880)</option>
+            <option value="+971">🇦🇪 UAE (+971)</option>
+            <option value="+62">🇮🇩 Indonesia (+62)</option>
+            <option value="+49">🇩🇪 Germany (+49)</option>
+            <option value="+33">🇫🇷 France (+33)</option>
+            <option value="+55">🇧🇷 Brazil (+55)</option>
+            <option value="+7">🇷🇺 Russia (+7)</option>
+            <option value="+84">🇻🇳 Vietnam (+84)</option>
+            <option value="+63">🇵🇭 Philippines (+63)</option>
+            <option value="+92">🇵🇰 Pakistan (+92)</option>
+            <option value="+234">🇳🇬 Nigeria (+234)</option>
+            <option value="+20">🇪🇬 Egypt (+20)</option>
+            <option value="+90">🇹🇷 Turkey (+90)</option>
+            <option value="+61">🇦🇺 Australia (+61)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- WhatsApp Dedicated Services Suite Banner & Grid -->
+      <div class="bg-gradient-to-r from-emerald-950/80 via-teal-950 to-slate-900 border-2 border-emerald-500/50 rounded-2xl p-5 shadow-lg space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-800/60 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-base shadow-sm">
+              <span class="material-symbols-outlined text-lg">chat</span>
+            </div>
+            <div>
+              <h3 class="font-headline font-bold text-title-lg text-white">WhatsApp Special Line Suite</h3>
+              <p class="text-xs text-emerald-300/80">Multiple specialized lines for WhatsApp personal, business, multi-device and re-activation.</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-900/80 px-2.5 py-1 rounded-full border border-emerald-700/60 self-start sm:self-auto">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 99.8% Ultra Delivery
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <!-- WhatsApp Option 1: Standard Personal -->
+          <div class="bg-slate-900/80 border border-emerald-800/60 rounded-xl p-3 flex flex-col justify-between space-y-2 hover:border-emerald-500 transition-colors">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">WhatsApp Personal</span>
+                <span class="font-headline font-bold text-emerald-400">₹2.50</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Fresh standard SIM for new personal accounts.</p>
+            </div>
+            <button onclick="orderNumber(&#39;WhatsApp Personal&#39;, 2.50)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-label font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 text-xs shadow-sm">
+              <span class="material-symbols-outlined text-xs">add</span> Rent ₹2.50
+            </button>
+          </div>
+
+          <!-- WhatsApp Option 2: Business Pro Priority -->
+          <div class="bg-emerald-950/40 border-2 border-emerald-500 rounded-xl p-3 flex flex-col justify-between space-y-2 relative shadow-md">
+            <span class="absolute -top-2 right-2 bg-emerald-500 text-slate-950 text-[9px] font-bold px-2 py-0.2 rounded-full uppercase">Fastest</span>
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">WhatsApp Business Pro</span>
+                <span class="font-headline font-bold text-emerald-400">₹3.50</span>
+              </div>
+              <p class="text-[11px] text-emerald-200/80 mt-0.5">High-speed priority gateway for WA Business &amp; API.</p>
+            </div>
+            <button onclick="orderNumber(&#39;WhatsApp Business Pro&#39;, 3.50)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-label font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 text-xs shadow-sm">
+              <span class="material-symbols-outlined text-xs">bolt</span> Rent ₹3.50
+            </button>
+          </div>
+
+          <!-- WhatsApp Option 3: Premium Re-Rent line -->
+          <div class="bg-slate-900/80 border border-emerald-800/60 rounded-xl p-3 flex flex-col justify-between space-y-2 hover:border-emerald-500 transition-colors">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">WhatsApp Re-Rent (30m)</span>
+                <span class="font-headline font-bold text-emerald-400">₹4.20</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Extended 30-minute window for 2FA / code retries.</p>
+            </div>
+            <button onclick="orderNumber(&#39;WhatsApp Re-Rent&#39;, 4.20)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-label font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 text-xs shadow-sm">
+              <span class="material-symbols-outlined text-xs">add</span> Rent ₹4.20
+            </button>
+          </div>
+
+          <!-- WhatsApp Option 4: Private Physical SIM -->
+          <div class="bg-slate-900/80 border border-emerald-800/60 rounded-xl p-3 flex flex-col justify-between space-y-2 hover:border-emerald-500 transition-colors">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">WhatsApp Physical SIM</span>
+                <span class="font-headline font-bold text-emerald-400">₹4.80</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Unshared real physical SIM card from Indian telecom.</p>
+            </div>
+            <button onclick="orderNumber(&#39;WhatsApp Physical SIM&#39;, 4.80)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-label font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 text-xs shadow-sm">
+              <span class="material-symbols-outlined text-xs">add</span> Rent ₹4.80
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Pricing Matrix (All Other Popular Apps) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Tier 1: Social & AI Apps -->
+        <div class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="border-b border-light-outline-variant dark:border-dark-outline pb-3">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tier 1 • Social &amp; AI</span>
+            <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Social, Chat &amp; AI Apps</h3>
+            <p class="text-xs text-slate-400 mt-1">High-volume shared pool for social media and AI tools.</p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">OpenAI / ChatGPT</div>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">99.4% Delivery</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.80</div>
+                <button onclick="orderNumber(&#39;OpenAI / ChatGPT&#39;, 1.80)" class="mt-1 bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary px-3.5 py-1.5 rounded-lg text-xs font-label font-bold hover:opacity-90 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Instagram / FB</div>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">98.2% Success</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.20</div>
+                <button onclick="orderNumber(&#39;Instagram&#39;, 1.20)" class="mt-1 bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary px-3.5 py-1.5 rounded-lg text-xs font-label font-bold hover:opacity-90 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">TikTok / Douyin</div>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Instant SMS</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.40</div>
+                <button onclick="orderNumber(&#39;TikTok&#39;, 1.40)" class="mt-1 bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary px-3.5 py-1.5 rounded-lg text-xs font-label font-bold hover:opacity-90 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Twitter / X</div>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">97.8% Success</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.50</div>
+                <button onclick="orderNumber(&#39;Twitter/X&#39;, 1.50)" class="mt-1 bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary px-3.5 py-1.5 rounded-lg text-xs font-label font-bold hover:opacity-90 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Snapchat</div>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Instant Verification</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.30</div>
+                <button onclick="orderNumber(&#39;Snapchat&#39;, 1.30)" class="mt-1 bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary px-3.5 py-1.5 rounded-lg text-xs font-label font-bold hover:opacity-90 flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier 2: Messaging, Cloud & Streaming -->
+        <div class="bg-light-surface dark:bg-dark-surface-container border-2 border-teal-500 rounded-2xl p-5 shadow-md space-y-4 relative">
+          <div class="absolute -top-3 right-4 bg-teal-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+            Recommended
+          </div>
+          <div class="border-b border-light-outline-variant dark:border-dark-outline pb-3">
+            <span class="text-[10px] font-bold text-teal-600 uppercase tracking-wider">Tier 2 • Priority Cloud</span>
+            <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Messaging &amp; Entertainment</h3>
+            <p class="text-xs text-slate-400 mt-1">High-speed priority servers for Telegram, Google, and streaming.</p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-teal-50/40 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Telegram Messenger Pro</div>
+                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">99.1% Success Rate</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹2.80</div>
+                <button onclick="orderNumber(&#39;Telegram Messenger&#39;, 2.80)" class="mt-1 bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-teal-50/40 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Google &amp; Gmail Pro</div>
+                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">99.5% Success Rate</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹2.20</div>
+                <button onclick="orderNumber(&#39;Google &amp; Gmail&#39;, 2.20)" class="mt-1 bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-teal-50/40 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Netflix &amp; OTT</div>
+                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">Clean Streaming Pool</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹2.50</div>
+                <button onclick="orderNumber(&#39;Netflix&#39;, 2.50)" class="mt-1 bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-teal-50/40 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Discord Community</div>
+                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">98.5% Success</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.20</div>
+                <button onclick="orderNumber(&#39;Discord&#39;, 1.20)" class="mt-1 bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-teal-50/40 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Steam / Gaming</div>
+                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold">Instant Code</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.60</div>
+                <button onclick="orderNumber(&#39;Steam&#39;, 1.60)" class="mt-1 bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier 3: Rides, Shopping & Dating -->
+        <div class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="border-b border-light-outline-variant dark:border-dark-outline pb-3">
+            <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Tier 3 • Dedicated Apps</span>
+            <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Travel, Shopping &amp; Finance</h3>
+            <p class="text-xs text-slate-400 mt-1">Dedicated unshared physical SIM cards for commerce and services.</p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Uber / Ride Booking</div>
+                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Immediate Dispatch</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹1.90</div>
+                <button onclick="orderNumber(&#39;Uber&#39;, 1.90)" class="mt-1 bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Amazon &amp; AWS</div>
+                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">100% Delivery SLA</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹3.80</div>
+                <button onclick="orderNumber(&#39;Amazon &amp; AWS&#39;, 3.80)" class="mt-1 bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Tinder / Bumble Dating</div>
+                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Fresh Clean Numbers</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹3.20</div>
+                <button onclick="orderNumber(&#39;Tinder / Dating&#39;, 3.20)" class="mt-1 bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">LinkedIn Business</div>
+                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Corporate Pool</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹2.60</div>
+                <button onclick="orderNumber(&#39;LinkedIn&#39;, 2.60)" class="mt-1 bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline">
+              <div>
+                <div class="font-bold text-light-primary dark:text-white">Payment Wallets</div>
+                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Private Sim Pool</span>
+              </div>
+              <div class="text-right">
+                <div class="font-headline font-bold text-sm text-light-primary dark:text-white">₹4.50</div>
+                <button onclick="orderNumber(&#39;Payment Wallets&#39;, 4.50)" class="mt-1 bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-label font-bold flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-xs">shopping_cart</span> Buy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: DEPOSIT SECTION (DYNAMIC LOCKED UPI) -->
+    <!-- ========================================== -->
+    <div id="tab-deposit" class="tab-content space-y-8">
+      
+      <div class="border-b border-light-outline-variant dark:border-dark-outline pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="font-headline text-headline-md font-bold text-light-primary dark:text-white">Wallet Recharge &amp; Preset Plans</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Strict exact-amount UPI deposit system tied directly to <strong class="text-light-primary dark:text-white font-code">imran75@fam</strong>.</p>
+        </div>
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+          <span class="material-symbols-outlined text-sm">lock</span> Minimum Deposit: ₹100 INR
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left: Plan Tier Cards & Custom Amount Selection (7 Columns) -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">1. Select Deposit Preset or Enter Custom Value</h3>
+
+          <!-- Preset Plan Cards Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="plansContainer">
+            
+            <!-- Tier 1: ₹100 -->
+            <div onclick="setDepositPlan(100, &#39;Starter Tier&#39;, &#39;tier1&#39;)" id="planCard-tier1" class="plan-box cursor-pointer border-2 border-light-outline-variant dark:border-dark-outline bg-light-surface dark:bg-dark-surface-container rounded-2xl p-4 transition-all hover:border-light-accent dark:hover:border-dark-accent shadow-sm">
+              <div class="flex justify-between items-start mb-2">
+                <span class="font-headline font-bold text-light-primary dark:text-white">Starter</span>
+                <span class="font-headline font-extrabold text-title-lg text-light-primary dark:text-white">₹100</span>
+              </div>
+              <div class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 rounded px-2 py-0.5 inline-block mb-3">
+                100 Credits (₹1.00/OTP)
+              </div>
+              <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 mb-4">
+                <li>• General OTP pool</li>
+                <li>• Instant auto-credit</li>
+                <li>• 30-day validity</li>
+              </ul>
+              <div class="w-full text-center py-1.5 rounded-lg border border-light-outline dark:border-dark-outline text-xs font-label text-light-primary dark:text-white select-btn">
+                Select ₹100
+              </div>
+            </div>
+
+            <!-- Tier 2: ₹500 (Popular) -->
+            <div onclick="setDepositPlan(500, &#39;Developer Pro&#39;, &#39;tier2&#39;)" id="planCard-tier2" class="plan-box cursor-pointer border-2 border-teal-500 bg-teal-50/30 dark:bg-teal-950/20 rounded-2xl p-4 transition-all shadow-md relative ring-2 ring-teal-500/20">
+              <div class="absolute -top-2.5 right-3 bg-teal-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                Most Popular
+              </div>
+              <div class="flex justify-between items-start mb-2">
+                <span class="font-headline font-bold text-light-primary dark:text-white">Developer Pro</span>
+                <span class="font-headline font-extrabold text-title-lg text-light-primary dark:text-white">₹500</span>
+              </div>
+              <div class="text-xs font-semibold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/60 rounded px-2 py-0.5 inline-block mb-3">
+                555 Credits (+11% Bonus)
+              </div>
+              <ul class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 mb-4">
+                <li>• Priority SMS line</li>
+                <li>• WhatsApp &amp; Telegram</li>
+                <li>• 90-day validity</li>
+              </ul>
+              <div class="w-full text-center py-1.5 rounded-lg bg-teal-600 text-white text-xs font-label font-bold select-btn">
+                Selected ₹500
+              </div>
+            </div>
+
+            <!-- Tier 3: ₹1,000 -->
+            <div onclick="setDepositPlan(1000, &#39;Enterprise Bulk&#39;, &#39;tier3&#39;)" id="planCard-tier3" class="plan-box cursor-pointer border-2 border-light-outline-variant dark:border-dark-outline bg-light-surface dark:bg-dark-surface-container rounded-2xl p-4 transition-all hover:border-light-accent dark:hover:border-dark-accent shadow-sm">
+              <div class="flex justify-between items-start mb-2">
+                <span class="font-headline font-bold text-light-primary dark:text-white">Enterprise</span>
+                <span class="font-headline font-extrabold text-title-lg text-light-primary dark:text-white">₹1,000</span>
+              </div>
+              <div class="text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 rounded px-2 py-0.5 inline-block mb-3">
+                1,250 Credits (+25% Bonus)
+              </div>
+              <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 mb-4">
+                <li>• Private physical pool</li>
+                <li>• All fintech/bank apps</li>
+                <li>• Lifetime validity</li>
+              </ul>
+              <div class="w-full text-center py-1.5 rounded-lg border border-light-outline dark:border-dark-outline text-xs font-label text-light-primary dark:text-white select-btn">
+                Select ₹1,000
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Custom Amount Input Field with ₹100 Min Floor -->
+          <div class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-5 shadow-sm space-y-3">
+            <label class="block font-headline font-bold text-light-primary dark:text-white text-sm">
+              Custom Amount (Minimum ₹100 INR)
+            </label>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="relative flex-1">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-headline font-bold text-lg text-slate-400">₹</span>
+                <input type="number" id="depositAmountInput" min="100" step="10" value="500" oninput="handleCustomDepositInput(this.value)" class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-light-outline dark:border-dark-outline bg-white dark:bg-slate-900 text-light-primary dark:text-white font-headline font-bold text-lg outline-none focus:border-teal-500 tabular-nums">
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="addAmountToInput(200)" class="px-3 py-2 border border-light-outline dark:border-dark-outline rounded-xl text-xs font-label text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  +₹200
+                </button>
+                <button type="button" onclick="addAmountToInput(500)" class="px-3 py-2 border border-light-outline dark:border-dark-outline rounded-xl text-xs font-label text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  +₹500
+                </button>
+                <button type="button" onclick="addAmountToInput(1000)" class="px-3 py-2 border border-light-outline dark:border-dark-outline rounded-xl text-xs font-label text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  +₹1,000
+                </button>
+              </div>
+            </div>
+            <div id="depositFloorError" class="hidden text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-semibold">
+              <span class="material-symbols-outlined text-sm">error</span> The minimum deposit amount is strictly ₹100 INR.
+            </div>
+          </div>
+
+          <!-- Proof Upload & Screenshot Submission Form -->
+          <div class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-light-outline-variant dark:border-dark-outline pb-3">
+              <h4 class="font-headline font-bold text-base text-light-primary dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-teal-600">upload_file</span>
+                Submit Payment Reference / UTR
+              </h4>
+              <span class="text-xs text-slate-400">Instant credit simulation</span>
+            </div>
+
+            <form onsubmit="submitPaymentProof(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-label font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+                  12-Digit UPI Ref / UTR Number
+                </label>
+                <input type="text" id="proofUtrInput" required placeholder="e.g. 431092817263" maxlength="12" class="w-full px-3.5 py-2 rounded-xl border border-light-outline dark:border-dark-outline bg-white dark:bg-slate-900 text-light-primary dark:text-white font-code text-xs uppercase outline-none focus:border-teal-500">
+              </div>
+
+              <!-- Upload Field for Screenshot -->
+              <div>
+                <label class="block text-xs font-label font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+                  Upload Payment Screenshot (Optional)
+                </label>
+                <div class="border-2 border-dashed border-light-outline dark:border-dark-outline rounded-xl p-4 text-center cursor-pointer hover:border-teal-500 transition-colors" onclick="document.getElementById(&#39;screenshotFileInput&#39;).click()">
+                  <input type="file" id="screenshotFileInput" accept="image/*" class="hidden" onchange="handleFileSelected(this)">
+                  <span class="material-symbols-outlined text-3xl text-slate-400 mb-1">add_photo_alternate</span>
+                  <div class="text-xs text-slate-600 dark:text-slate-300 font-label" id="fileUploadPrompt">Click to attach screenshot</div>
+                  <span class="text-[10px] text-slate-400">Showing UPI confirmation slip with timestamp</span>
+                </div>
+              </div>
+
+              <button type="submit" id="submitProofBtn" class="w-full bg-light-primary dark:bg-dark-primary hover:bg-slate-800 dark:hover:bg-sky-400 text-white dark:text-dark-on-primary py-2.5 rounded-xl font-label font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-98">
+                <span class="material-symbols-outlined text-sm">send</span>
+                <span>Submit Deposit for Verification</span>
+              </button>
+
+              <div id="proofSuccessBox" class="hidden text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-base text-amber-600 animate-spin mt-0.5">autorenew</span>
+                <div>
+                  <strong class="block font-semibold">Deposit Under Processing</strong>
+                  <span id="proofSuccessMessage">Your UPI transaction is currently being processed. Balance will be updated once confirmed.</span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Right: Strict-Locked Dynamic UPI QR & Payment Button (5 Columns) -->
+        <div class="lg:col-span-5 bg-light-surface dark:bg-dark-surface-container border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-xl space-y-5">
+          
+          <div class="flex items-center justify-between border-b border-light-outline-variant dark:border-dark-outline pb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-upi text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                UPI
+              </div>
+              <div>
+                <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Dynamic UPI QR</h3>
+                <span class="text-xs text-slate-400">VPA: <strong class="text-light-primary dark:text-white font-code">imran75@fam</strong></span>
+              </div>
+            </div>
+            <span class="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[11px] font-label font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">lock</span> Strict Lock
+            </span>
+          </div>
+
+          <!-- Strict Exact Amount Notice -->
+          <div class="bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 rounded-xl p-3.5 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">report_problem</span>
+            <div>
+              <strong>Strict Exact Amount Rule:</strong>
+              Pay <em>exactly</em> <span class="font-headline font-bold text-sm underline" id="exactLockedNoticeText">₹500.00</span>. Any transaction differing by even ₹1.00 will not auto-credit.
+            </div>
+          </div>
+
+          <!-- Dynamic SVG QR Code Display -->
+          <div class="bg-slate-50 dark:bg-slate-900 border border-light-outline-variant dark:border-dark-outline rounded-2xl p-5 text-center flex flex-col items-center">
+            
+            <div class="bg-white p-3 rounded-xl shadow-md border border-slate-200 inline-block">
+              <svg id="qrCanvasSvg" class="w-44 h-44" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="200" fill="white" rx="8"></rect>
+                <!-- Corner Targets -->
+                <rect x="16" y="16" width="44" height="44" rx="4" fill="#0F172A"></rect>
+                <rect x="24" y="24" width="28" height="28" rx="2" fill="white"></rect>
+                <rect x="30" y="30" width="16" height="16" rx="2" fill="#5F259F"></rect>
+
+                <rect x="140" y="16" width="44" height="44" rx="4" fill="#0F172A"></rect>
+                <rect x="148" y="24" width="28" height="28" rx="2" fill="white"></rect>
+                <rect x="154" y="30" width="16" height="16" rx="2" fill="#5F259F"></rect>
+
+                <rect x="16" y="140" width="44" height="44" rx="4" fill="#0F172A"></rect>
+                <rect x="24" y="148" width="28" height="28" rx="2" fill="white"></rect>
+                <rect x="30" y="154" width="16" height="16" rx="2" fill="#5F259F"></rect>
+
+                <!-- QR Elements -->
+                <g fill="#0F172A">
+                  <rect x="70" y="20" width="8" height="8" rx="1"></rect>
+                  <rect x="85" y="20" width="16" height="8" rx="1"></rect>
+                  <rect x="110" y="20" width="8" height="8" rx="1"></rect>
+                  <rect x="70" y="35" width="24" height="8" rx="1"></rect>
+                  <rect x="105" y="35" width="16" height="8" rx="1"></rect>
+                  <rect x="70" y="52" width="12" height="12" rx="1"></rect>
+                  <rect x="90" y="52" width="30" height="8" rx="1"></rect>
+
+                  <rect x="20" y="70" width="16" height="8" rx="1"></rect>
+                  <rect x="44" y="70" width="8" height="16" rx="1"></rect>
+                  <rect x="20" y="86" width="24" height="8" rx="1"></rect>
+                  <rect x="20" y="102" width="8" height="20" rx="1"></rect>
+                  <rect x="36" y="102" width="16" height="8" rx="1"></rect>
+                  <rect x="36" y="118" width="8" height="8" rx="1"></rect>
+
+                  <!-- Center Logo Badge -->
+                  <circle cx="100" cy="100" r="22" fill="#5F259F"></circle>
+                  <circle cx="100" cy="100" r="18" fill="white"></circle>
+                  <path d="M93 96L98 101L107 92" stroke="#5F259F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <text x="100" y="111" text-anchor="middle" font-size="6" font-weight="bold" fill="#5F259F">UPI LOCK</text>
+
+                  <rect x="135" y="70" width="16" height="8" rx="1"></rect>
+                  <rect x="160" y="70" width="20" height="8" rx="1"></rect>
+                  <rect x="140" y="85" width="30" height="12" rx="1"></rect>
+                  <rect x="140" y="105" width="12" height="8" rx="1"></rect>
+                  <rect x="160" y="105" width="24" height="8" rx="1"></rect>
+                  <rect x="140" y="120" width="44" height="8" rx="1"></rect>
+
+                  <rect x="70" y="130" width="12" height="12" rx="1"></rect>
+                  <rect x="90" y="130" width="20" height="8" rx="1"></rect>
+                  <rect x="118" y="130" width="12" height="12" rx="1"></rect>
+                  <rect x="70" y="150" width="24" height="8" rx="1"></rect>
+                  <rect x="102" y="150" width="8" height="20" rx="1"></rect>
+                  <rect x="118" y="150" width="16" height="8" rx="1"></rect>
+                  <rect x="70" y="166" width="12" height="12" rx="1"></rect>
+                  <rect x="118" y="166" width="24" height="8" rx="1"></rect>
+                  <rect x="88" y="174" width="20" height="8" rx="1"></rect>
+                </g>
+              </svg>
+
+              <div class="mt-2 py-1 px-3 bg-slate-900 text-emerald-400 font-headline font-bold text-xs rounded-lg flex items-center justify-center gap-1 shadow-sm">
+                <span class="material-symbols-outlined text-xs">lock</span>
+                <span id="qrBadgePrice">EXACT ₹500.00</span>
+              </div>
+            </div>
+
+            <!-- Receiver UPI ID with Copy -->
+            <div class="w-full mt-4 flex items-center justify-between bg-white dark:bg-slate-800 border border-light-outline-variant dark:border-dark-outline px-3.5 py-2.5 rounded-xl">
+              <div class="text-left">
+                <span class="text-[10px] uppercase font-semibold text-slate-400 block">Verified VPA</span>
+                <span class="font-code font-bold text-xs text-light-primary dark:text-white">imran75@fam</span>
+              </div>
+              <button onclick="copyUpiVpa(this)" class="flex items-center gap-1 text-xs font-label font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950 px-2.5 py-1 rounded-lg">
+                <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Direct UPI Intent Button -->
+          <a id="upiDirectIntentLink" href="upi://pay?pa=imran75@fam&amp;pn=FlashOTP&amp;am=500.00&amp;cu=INR&amp;tn=FlashOTP_500_Deposit" class="w-full bg-upi hover:bg-purple-900 text-white font-label font-bold text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98">
+            <span class="material-symbols-outlined text-lg">open_in_new</span>
+            <span id="upiIntentButtonLabel">Pay Exact ₹500.00 via UPI App</span>
+          </a>
+
+          <p class="text-center text-[11px] text-slate-400">
+            Compatible with Google Pay, PhonePe, Paytm, BHIM &amp; all Indian banking apps.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: HISTORY & ORDERS                    -->
+    <!-- ========================================== -->
+    <div id="tab-history" class="tab-content space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-light-outline-variant dark:border-dark-outline pb-4">
+        <div>
+          <h2 class="font-headline text-headline-md font-bold text-light-primary dark:text-white">Orders &amp; Deposit History</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Review real-time status of your virtual numbers and wallet deposits.</p>
+        </div>
+      </div>
+
+      <!-- Segmented Subtabs: OTP Purchases vs Deposits -->
+      <div class="flex items-center gap-2 border-b border-light-outline-variant dark:border-dark-outline pb-2">
+        <button onclick="switchHistorySubtab(&#39;otps&#39;)" id="subtab-btn-otps" class="px-4 py-1.5 rounded-lg text-xs font-label font-bold bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary">
+          OTP Number Orders (<span id="historyOtpsCount">0</span>)
+        </button>
+        <button onclick="switchHistorySubtab(&#39;deposits&#39;)" id="subtab-btn-deposits" class="px-4 py-1.5 rounded-lg text-xs font-label font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          UPI Deposits (<span id="historyDepositsCount">0</span>)
+        </button>
+      </div>
+
+      <!-- Subtab Content: OTP Orders -->
+      <div id="subtab-otps" class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs font-body">
+            <thead class="bg-slate-50 dark:bg-slate-900 border-b border-light-outline-variant dark:border-dark-outline text-slate-500 dark:text-slate-400 font-label">
+              <tr>
+                <th class="py-3 px-4 font-semibold">Order ID</th>
+                <th class="py-3 px-4 font-semibold">Service</th>
+                <th class="py-3 px-4 font-semibold">Phone Number</th>
+                <th class="py-3 px-4 font-semibold">OTP Code</th>
+                <th class="py-3 px-4 font-semibold">Price</th>
+                <th class="py-3 px-4 font-semibold">Time</th>
+                <th class="py-3 px-4 font-semibold text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyOtpTableBody" class="divide-y divide-light-outline-variant dark:divide-dark-outline">
+              <tr id="emptyOtpHistoryRow">
+                <td colspan="7" class="py-8 text-center text-slate-400 italic">
+                  No OTP orders yet. Rent a number from the Services tab to view incoming records here.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Subtab Content: Deposits -->
+      <div id="subtab-deposits" class="hidden bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs font-body">
+            <thead class="bg-slate-50 dark:bg-slate-900 border-b border-light-outline-variant dark:border-dark-outline text-slate-500 dark:text-slate-400 font-label">
+              <tr>
+                <th class="py-3 px-4 font-semibold">Transaction ID</th>
+                <th class="py-3 px-4 font-semibold">Plan / Type</th>
+                <th class="py-3 px-4 font-semibold">Amount (INR)</th>
+                <th class="py-3 px-4 font-semibold">UTR Reference</th>
+                <th class="py-3 px-4 font-semibold">Destination VPA</th>
+                <th class="py-3 px-4 font-semibold">Time</th>
+                <th class="py-3 px-4 font-semibold text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyDepositTableBody" class="divide-y divide-light-outline-variant dark:divide-dark-outline">
+              <tr id="emptyDepositHistoryRow">
+                <td colspan="7" class="py-8 text-center text-slate-400 italic">
+                  No deposits completed yet. Recharge via UPI to start.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Insufficient Balance Modal Dialog -->
+  <div id="insufficientBalanceModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-light-surface dark:bg-dark-surface-container border border-light-outline-variant dark:border-dark-outline rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-150">
+      <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+      </div>
+      <div class="text-center space-y-1">
+        <h3 class="font-headline font-bold text-title-lg text-light-primary dark:text-white">Insufficient Wallet Balance</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Your current balance is <span class="font-bold text-rose-600 dark:text-rose-400 tabular-nums" id="modalCurrentBalance">₹0.00</span>. You cannot rent an OTP number without recharging your wallet first.
+        </p>
+      </div>
+
+      <div class="bg-light-surface-container-low dark:bg-dark-surface-container-low border border-light-outline-variant dark:border-dark-outline rounded-xl p-3 text-xs flex justify-between items-center">
+        <span class="text-slate-500">Service: <strong class="text-light-primary dark:text-white" id="modalServiceName">Service</strong></span>
+        <span class="font-bold text-slate-700 dark:text-slate-200">Required: <span class="text-light-primary dark:text-white font-headline" id="modalRequiredPrice">₹0.00</span></span>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="closeInsufficientBalanceModal()" class="w-1/2 py-2.5 rounded-xl border border-light-outline dark:border-dark-outline text-xs font-label font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          Cancel
+        </button>
+        <button onclick="goToDepositFromModal()" class="w-1/2 py-2.5 rounded-xl bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary text-xs font-label font-bold hover:bg-slate-800 flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-sm">add_card</span> Deposit via UPI
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="bg-light-surface dark:bg-dark-surface-container border-t border-light-outline-variant dark:border-dark-outline py-4 px-6 mt-12 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <span class="font-headline font-bold text-light-primary dark:text-white">FlashOTP</span>
+      <span>• Dynamic Locked UPI Gateway strictly to <strong class="font-code text-slate-700 dark:text-slate-200">imran75@fam</strong></span>
+    </div>
+    <div class="flex items-center gap-4 text-xs font-label">
+      <span>256-bit Encrypted SSL Gateway</span>
+    </div>
+  </footer>
+
+  <!-- Application Logic & Scripts -->
+  <script>
+    let userBalance = 0.00;
+    let currentLockedAmount = 500;
+    const receiverUpi = "imran75@fam";
+    let activeNumbersList = [];
+    let otpOrdersHistory = [];
+    let depositHistory = [];
+
+    // Dark / Light Mode Switcher
+    function toggleThemeMode() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+        try { localStorage.setItem('flashotp_theme', 'light'); } catch(e) {}
+      } else {
+        htmlEl.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+        try { localStorage.setItem('flashotp_theme', 'dark'); } catch(e) {}
+      }
+    }
+
+    // Initialize Theme
+    try {
+      if (localStorage.getItem('flashotp_theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').textContent = 'light_mode';
+      }
+    } catch(e) {}
+
+    // Tab Navigation Logic
+    function switchTab(tabId) {
+      // Hide all tabs
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(t => t.classList.remove('active'));
+
+      // Show selected tab
+      const targetTab = document.getElementById('tab-' + tabId);
+      if (targetTab) targetTab.classList.add('active');
+
+      // Update Nav Buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = 'nav-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-light-surface-container dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2';
+      });
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if (activeBtn) {
+        activeBtn.className = 'nav-btn px-3 py-1.5 rounded-lg text-light-accent dark:text-dark-accent bg-teal-50 dark:bg-teal-950/60 font-semibold flex items-center gap-2 transition-all';
+      }
+
+      // Update Mobile Nav
+      document.querySelectorAll('.mobile-nav-btn').forEach(m => {
+        m.classList.remove('text-light-accent', 'dark:text-dark-accent');
+        m.classList.add('text-slate-500', 'dark:text-slate-400');
+      });
+      const activeMobile = document.getElementById('m-nav-' + tabId);
+      if (activeMobile) {
+        activeMobile.classList.remove('text-slate-500', 'dark:text-slate-400');
+        activeMobile.classList.add('text-light-accent', 'dark:text-dark-accent');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // History Subtab Switcher
+    function switchHistorySubtab(type) {
+      const depBtn = document.getElementById('subtab-btn-deposits');
+      const otpBtn = document.getElementById('subtab-btn-otps');
+      const depContent = document.getElementById('subtab-deposits');
+      const otpContent = document.getElementById('subtab-otps');
+
+      if (type === 'deposits') {
+        depContent.classList.remove('hidden');
+        otpContent.classList.add('hidden');
+        depBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-label font-bold bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary';
+        otpBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-label font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800';
+      } else {
+        depContent.classList.add('hidden');
+        otpContent.classList.remove('hidden');
+        otpBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-label font-bold bg-light-primary dark:bg-dark-primary text-white dark:text-dark-on-primary';
+        depBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-label font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800';
+      }
+    }
+
+    // Deposit Plan Selection
+    function setDepositPlan(amount, planName, tierId) {
+      if (amount < 100) return;
+      currentLockedAmount = amount;
+      document.getElementById('depositAmountInput').value = amount;
+      document.getElementById('depositFloorError').classList.add('hidden');
+      updatePlanBoxes(tierId);
+      updateUpiLock(amount, planName);
+    }
+
+    function addAmountToInput(add) {
+      const inp = document.getElementById('depositAmountInput');
+      let val = (parseInt(inp.value) || 0) + add;
+      if (val < 100) val = 100;
+      inp.value = val;
+      handleCustomDepositInput(val);
+    }
+
+    function handleCustomDepositInput(val) {
+      const amount = parseFloat(val);
+      const err = document.getElementById('depositFloorError');
+      const btn = document.getElementById('upiDirectIntentLink');
+
+      if (!amount || amount < 100) {
+        err.classList.remove('hidden');
+        btn.classList.add('opacity-50', 'pointer-events-none');
+        document.getElementById('qrBadgePrice').textContent = "MINIMUM ₹100 REQUIRED";
+        return;
+      }
+
+      err.classList.add('hidden');
+      btn.classList.remove('opacity-50', 'pointer-events-none');
+      currentLockedAmount = amount;
+      updatePlanBoxes(null);
+      updateUpiLock(amount, 'Custom Plan');
+    }
+
+    function updatePlanBoxes(activeTierId) {
+      const boxes = document.querySelectorAll('.plan-box');
+      boxes.forEach(b => {
+        b.classList.remove('border-teal-500', 'bg-teal-50/30', 'dark:bg-teal-950/20', 'ring-2', 'ring-teal-500/20');
+        b.classList.add('border-light-outline-variant', 'dark:border-dark-outline', 'bg-light-surface', 'dark:bg-dark-surface-container');
+        const btn = b.querySelector('.select-btn');
+        if (btn) {
+          btn.className = 'w-full text-center py-1.5 rounded-lg border border-light-outline dark:border-dark-outline text-xs font-label text-light-primary dark:text-white select-btn';
+          btn.textContent = btn.textContent.replace('Selected', 'Select');
+        }
+      });
+
+      if (activeTierId) {
+        const active = document.getElementById('planCard-' + activeTierId);
+        if (active) {
+          active.classList.remove('border-light-outline-variant', 'dark:border-dark-outline');
+          active.classList.add('border-teal-500', 'bg-teal-50/30', 'dark:bg-teal-950/20', 'ring-2', 'ring-teal-500/20');
+          const b = active.querySelector('.select-btn');
+          if (b) {
+            b.className = 'w-full text-center py-1.5 rounded-lg bg-teal-600 text-white text-xs font-label font-bold select-btn';
+            b.textContent = 'Selected ₹' + currentLockedAmount;
+          }
+        }
+      }
+    }
+
+    function updateUpiLock(amount, planTitle) {
+      const formatted = amount.toFixed(2);
+      document.getElementById('exactLockedNoticeText').textContent = '₹' + formatted;
+      document.getElementById('qrBadgePrice').textContent = 'EXACT ₹' + formatted;
+      document.getElementById('upiIntentButtonLabel').textContent = 'Pay Exact ₹' + formatted + ' via UPI App';
+
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(receiverUpi)}&pn=FlashOTP&am=${formatted}&cu=INR&tn=${encodeURIComponent('FlashOTP_Wallet_' + amount)}`;
+      document.getElementById('upiDirectIntentLink').setAttribute('href', upiUrl);
+    }
+
+    function copyUpiVpa(btn) {
+      navigator.clipboard.writeText(receiverUpi).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">done</span> Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      }).catch(() => { alert("VPA: " + receiverUpi); });
+    }
+
+    function copyCode(code, btn) {
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">done</span> Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      });
+    }
+
+    function handleFileSelected(input) {
+      if (input.files && input.files[0]) {
+        document.getElementById('fileUploadPrompt').textContent = "Attached: " + input.files[0].name;
+      }
+    }
+
+    // Submit Payment Proof / Processing Submission
+    function submitPaymentProof(e) {
+      e.preventDefault();
+      const utr = document.getElementById('proofUtrInput').value.trim();
+      if (utr.length < 8) {
+        alert("Please enter a valid 12-digit UPI reference number.");
+        return;
+      }
+
+      const depositAmount = currentLockedAmount;
+
+      // Log deposit to history with 'Processing' status
+      const txId = "TX-" + Math.floor(100000 + Math.random() * 900000);
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      depositHistory.unshift({
+        txId: txId,
+        plan: "Recharge (₹" + depositAmount + ")",
+        amount: depositAmount,
+        utr: utr,
+        vpa: receiverUpi,
+        time: "Just now (" + nowStr + ")",
+        status: "Processing"
+      });
+      renderDepositHistory();
+
+      // Show processing feedback box
+      const successBox = document.getElementById('proofSuccessBox');
+      document.getElementById('proofSuccessMessage').textContent = `Deposit of ₹${depositAmount.toFixed(2)} with UTR ${utr} has been submitted and is currently Processing. Balance will be updated upon confirmation.`;
+      successBox.classList.remove('hidden');
+      document.getElementById('proofUtrInput').value = '';
+
+      const submitBtn = document.getElementById('submitProofBtn');
+      if (submitBtn) {
+        submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">autorenew</span><span>Processing Deposit...</span>';
+        setTimeout(() => {
+          submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm">send</span><span>Submit Deposit for Verification</span>';
+        }, 2000);
+      }
+
+      setTimeout(() => {
+        alert(`Deposit Submitted! Transaction ${txId} for ₹${depositAmount.toFixed(2)} is now Processing.`);
+        switchTab('history');
+        switchHistorySubtab('deposits');
+      }, 1000);
+    }
+
+    // Update Balance everywhere across UI
+    function updateBalanceUI() {
+      const formatted = '₹' + userBalance.toFixed(2);
+      document.getElementById('userLiveBalance').textContent = formatted;
+      document.getElementById('heroWalletDisplay').textContent = formatted;
+      document.getElementById('heroCreditsEstimate').textContent = `≈ ${Math.floor(userBalance)} Starter OTPs`;
+
+      const alertBanner = document.getElementById('zeroBalanceAlertBanner');
+      const dot = document.getElementById('balanceDotIndicator');
+      if (userBalance > 0) {
+        alertBanner.classList.add('hidden');
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+      } else {
+        alertBanner.classList.remove('hidden');
+        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-400";
+      }
+    }
+
+    // Balance-Strict Order Number Logic
+    function orderNumber(service, price) {
+      if (userBalance < price) {
+        // Show Insufficient Balance Modal
+        document.getElementById('modalCurrentBalance').textContent = '₹' + userBalance.toFixed(2);
+        document.getElementById('modalServiceName').textContent = service;
+        document.getElementById('modalRequiredPrice').textContent = '₹' + price.toFixed(2);
+        document.getElementById('insufficientBalanceModal').classList.remove('hidden');
+        return;
+      }
+
+      // Deduct balance
+      userBalance -= price;
+      updateBalanceUI();
+
+      // Get selected country dial code
+      const countrySelect = document.getElementById('serviceCountrySelect');
+      const selectedDialCode = countrySelect ? countrySelect.value : "+91";
+      const selectedCountryText = countrySelect ? countrySelect.options[countrySelect.selectedIndex].text.split(' ')[0] : "🇮🇳";
+
+      // Generate random phone number with selected country code
+      const randomPhone = selectedDialCode + " " + (Math.floor(70000 + Math.random() * 29999)) + " " + (Math.floor(10000 + Math.random() * 89999));
+      const orderId = "#ORD-" + Math.floor(1000 + Math.random() * 9000);
+      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const codeFormatted = randomCode.substring(0,3) + "-" + randomCode.substring(3);
+
+      const newItem = {
+        id: orderId,
+        service: `${selectedCountryText} ${service}`,
+        phone: randomPhone,
+        code: null, // Will simulate code arrival in 4 seconds
+        tempCode: codeFormatted,
+        price: price,
+        remainingSeconds: 900,
+        timerInterval: null
+      };
+
+      activeNumbersList.unshift(newItem);
+      renderActiveNumbers();
+
+      // Log to history
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      otpOrdersHistory.unshift({
+        orderId: orderId,
+        service: `${selectedCountryText} ${service} (${selectedDialCode})`,
+        phone: randomPhone,
+        code: "Waiting...",
+        price: price,
+        time: "Just now (" + nowStr + ")",
+        status: "Active"
+      });
+      renderOtpHistory();
+
+      // Update Dashboard Counters
+      document.getElementById('statActiveNumbers').textContent = activeNumbersList.length + " Live";
+      document.getElementById('activeListeningDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
+
+      alert(`Success! Virtual number assigned for ${service}: ${randomPhone}. Deducted ₹${price.toFixed(2)}.`);
+      switchTab('dashboard');
+
+      // Simulate incoming SMS OTP code in 4 seconds
+      setTimeout(() => {
+        newItem.code = newItem.tempCode;
+        renderActiveNumbers();
+        // Update history row with arrived code
+        const hist = otpOrdersHistory.find(h => h.orderId === orderId);
+        if (hist) {
+          hist.code = newItem.code;
+          hist.status = "Received";
+          renderOtpHistory();
+        }
+        document.getElementById('statOtpsReceived').textContent = otpOrdersHistory.filter(h => h.status === "Received").length;
+      }, 4000);
+    }
+
+    // Modal Control
+    function closeInsufficientBalanceModal() {
+      document.getElementById('insufficientBalanceModal').classList.add('hidden');
+    }
+
+    function goToDepositFromModal() {
+      closeInsufficientBalanceModal();
+      switchTab('deposit');
+    }
+
+    // Render Active Numbers Container
+    function renderActiveNumbers() {
+      const emptyState = document.getElementById('emptyNumbersState');
+      const grid = document.getElementById('activeCardsGrid');
+      const dot = document.getElementById('activeListeningDot');
+
+      if (activeNumbersList.length === 0) {
+        emptyState.classList.remove('hidden');
+        grid.classList.add('hidden');
+        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-400";
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.classList.remove('hidden');
+      dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
+      grid.innerHTML = '';
+
+      activeNumbersList.forEach((item, index) => {
+        const card = document.createElement('div');
+        if (item.code) {
+          card.className = "border border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/30 dark:bg-emerald-950/20 rounded-xl p-4 flex flex-col justify-between space-y-3";
+          card.innerHTML = `
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded">${item.service} (+91)</span>
+                <div class="font-headline font-bold text-lg text-light-primary dark:text-white mt-1.5 font-code tracking-wider">${item.phone}</div>
+              </div>
+              <span class="text-xs text-emerald-700 dark:text-emerald-400 font-label font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">timer</span> 14:48 remaining
+              </span>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 uppercase font-semibold block">Received Code</span>
+                <span class="font-code font-extrabold text-xl text-emerald-600 dark:text-emerald-400 tracking-widest">${item.code}</span>
+              </div>
+              <button onclick="copyCode('${item.code.replace('-','')}', this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-label font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+              </button>
+            </div>
+          `;
+        } else {
+          card.className = "border border-light-outline dark:border-dark-outline bg-light-surface-container-low dark:bg-dark-surface-container-low rounded-xl p-4 flex flex-col justify-between space-y-3";
+          card.innerHTML = `
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300 px-2 py-0.5 rounded">${item.service} (+91)</span>
+                <div class="font-headline font-bold text-lg text-light-primary dark:text-white mt-1.5 font-code tracking-wider">${item.phone}</div>
+              </div>
+              <span class="text-xs text-amber-600 dark:text-amber-400 font-label font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm animate-spin">refresh</span> Waiting for SMS...
+              </span>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-light-outline dark:border-dark-outline rounded-lg p-3 flex items-center justify-between text-slate-400 text-xs">
+              <span class="italic">Code will automatically populate within a few seconds...</span>
+              <button onclick="cancelActiveNumber(${index})" class="text-rose-600 text-xs font-semibold hover:underline">Cancel</button>
+            </div>
+          `;
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    function cancelActiveNumber(index) {
+      activeNumbersList.splice(index, 1);
+      renderActiveNumbers();
+      document.getElementById('statActiveNumbers').textContent = activeNumbersList.length + " Live";
+    }
+
+    // Render Order History Table
+    function renderOtpHistory() {
+      const tbody = document.getElementById('historyOtpTableBody');
+      const counter = document.getElementById('historyOtpsCount');
+      counter.textContent = otpOrdersHistory.length;
+
+      if (otpOrdersHistory.length === 0) {
+        tbody.innerHTML = `
+          <tr id="emptyOtpHistoryRow">
+            <td colspan="7" class="py-8 text-center text-slate-400 italic">
+              No OTP orders yet. Rent a number from the Services tab to view incoming records here.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      otpOrdersHistory.forEach(h => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50";
+        const isReceived = h.status === "Received";
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-code text-light-primary dark:text-white font-bold">${h.orderId}</td>
+          <td class="py-3.5 px-4 font-bold text-light-primary dark:text-white">${h.service}</td>
+          <td class="py-3.5 px-4 font-code">${h.phone}</td>
+          <td class="py-3.5 px-4 font-code ${isReceived ? 'font-bold text-emerald-600' : 'text-slate-400 italic'}">${h.code}</td>
+          <td class="py-3.5 px-4 font-headline font-bold">₹${h.price.toFixed(2)}</td>
+          <td class="py-3.5 px-4 text-slate-400">${h.time}</td>
+          <td class="py-3.5 px-4 text-right">
+            <span class="inline-flex items-center gap-1 ${isReceived ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'} border px-2 py-0.5 rounded-full font-label font-bold text-[10px]">
+              <span class="w-1.5 h-1.5 rounded-full ${isReceived ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}"></span> ${h.status}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Deposit History Table
+    function renderDepositHistory() {
+      const tbody = document.getElementById('historyDepositTableBody');
+      const counter = document.getElementById('historyDepositsCount');
+      counter.textContent = depositHistory.length;
+
+      if (depositHistory.length === 0) {
+        tbody.innerHTML = `
+          <tr id="emptyDepositHistoryRow">
+            <td colspan="7" class="py-8 text-center text-slate-400 italic">
+              No deposits completed yet. Recharge via UPI to start.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      depositHistory.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50";
+        const isApproved = d.status === "Approved";
+        const isProcessing = d.status === "Processing";
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-code text-light-primary dark:text-white font-bold">${d.txId}</td>
+          <td class="py-3.5 px-4">${d.plan}</td>
+          <td class="py-3.5 px-4 font-headline font-bold text-emerald-600 tabular-nums">₹${d.amount.toFixed(2)}</td>
+          <td class="py-3.5 px-4 font-code text-slate-500">${d.utr}</td>
+          <td class="py-3.5 px-4 font-code text-purple-600">${d.vpa}</td>
+          <td class="py-3.5 px-4 text-slate-400">${d.time}</td>
+          <td class="py-3.5 px-4 text-right">
+            <span class="inline-flex items-center gap-1 ${isApproved ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'} border px-2 py-0.5 rounded-full font-label font-bold text-[10px]">
+              <span class="w-1.5 h-1.5 rounded-full ${isApproved ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}"></span> ${d.status}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Initialize initial state
+    updateBalanceUI();
+  </script>
+
+
+</body></html>
